@@ -42,7 +42,8 @@
     return JSON.parse(new TextDecoder().decode(bytes));
   }
 
-  var params = new URLSearchParams(location.search);
+  // 주소·받아쓴 문장이 서버로 전송되지 않도록 # 뒤(프래그먼트)를 우선 읽습니다.
+  var params = new URLSearchParams(location.hash.length > 1 ? location.hash.slice(1) : location.search);
   if (params.get('c')) {
     try {
       var cfg = decodeConfig(params.get('c'));
@@ -391,7 +392,7 @@
       s: settings.shortcutName || DEFAULT_SHORTCUT,
       p: places.map(function (p) { return { n: p.name, a: p.aliases || [], d: p.address || '', i: p.icon || '📍' }; })
     };
-    return location.origin + location.pathname + '?c=' + encodeConfig(cfg) + '&auto=1&text=';
+    return location.origin + location.pathname + '#c=' + encodeConfig(cfg) + '&auto=1&text=';
   }
   function renderLauncherUrl() { $('launcher-url').value = launcherUrl(); }
 
@@ -462,5 +463,8 @@
   }
 
   // 테스트에서 쓸 수 있도록 노출
+  // 이미 열려 있는 탭에 새 문장이 # 뒤로만 들어오면 다시 읽어 들입니다.
+  window.addEventListener('hashchange', function () { if (location.hash.length > 1) location.reload(); });
+
   window.VoiceReminder = { buildPayload: buildPayload, shortcutUrl: shortcutUrl, launcherUrl: launcherUrl, decodeConfig: decodeConfig, getDrafts: function () { return drafts; } };
 })();
