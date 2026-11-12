@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>음성 미리알림</title>
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="음성 미리알림">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-180.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main id="tab-capture" class="tab">
+  <h1>음성 미리알림</h1>
+
+  <section class="card" id="status-card">
+    <div class="status-row">
+      <span class="dot" id="status-dot"></span>
+      <span id="status-text">단축어 연결 확인 필요</span>
+      <button class="pill" id="status-action" type="button">연결하기</button>
+    </div>
+    <hr>
+    <div class="toggle-grid">
+      <label class="toggle"><span>열자마자 듣기</span><input type="checkbox" id="opt-auto-mic"><i></i></label>
+      <label class="toggle"><span>말 끝나면 자동 등록</span><input type="checkbox" id="opt-auto-save"><i></i></label>
+    </div>
+  </section>
+
+  <p class="hint">💡 눌러서 바로 테스트해 보세요</p>
+  <div class="chips" id="sample-chips"></div>
+
+  <div class="mic-wrap">
+    <button id="mic" type="button" aria-label="눌러서 말하기">
+      <svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path fill="currentColor" d="M12 15a4 4 0 0 0 4-4V6a4 4 0 1 0-8 0v5a4 4 0 0 0 4 4Zm7-4a1 1 0 1 0-2 0 5 5 0 0 1-10 0 1 1 0 1 0-2 0 7 7 0 0 0 6 6.92V20H8.5a1 1 0 1 0 0 2h7a1 1 0 1 0 0-2H13v-2.08A7 7 0 0 0 19 11Z"/></svg>
+      <span id="mic-label">눌러서 말하기</span>
+    </button>
+    <p class="hint center" id="mic-hint" hidden></p>
+  </div>
+
+  <textarea id="input" rows="2" placeholder='예: "집 도착했을 때 세탁기 돌리기", "내일 3시 치과 가기"' enterkeyhint="done"></textarea>
+
+  <section id="preview" hidden>
+    <div class="preview-head">
+      <strong id="preview-count"></strong>
+      <span class="badge">위치·시간 자동 감지</span>
+    </div>
+    <div id="drafts"></div>
+    <button id="register" class="primary" type="button">미리알림에 등록</button>
+    <p class="hint center" id="register-hint"></p>
+  </section>
+
+  <section class="card" id="tips">
+    <strong>🎙️ 이렇게 말씀해 보세요</strong>
+    <ul>
+      <li>🏠 "집 도착했을 때 세탁기 돌리기"</li>
+      <li>🎓 "학교 도착하면 도서관 책 반납하기"</li>
+      <li>↖️ "집에서 출발할 때 우산 챙기기"</li>
+      <li>⏰ "내일 오후 3시에 치과 가기"</li>
+      <li>✨ "퇴근할 때 마트 들르기 그리고 집 도착하면 택배 확인"</li>
+    </ul>
+  </section>
+</main>
+
+<main id="tab-places" class="tab" hidden>
+  <h1>내 장소</h1>
+  <section class="card">
+    <strong>📍 위치 알림이 동작하는 방식</strong>
+    <p class="small">장소마다 주소를 한 번 적어 두면, "집 도착했을 때 ~"라고 말할 때 그 주소로 아이폰 미리알림의 위치 알림이 만들어집니다. 주소는 Apple 지도에서 검색되는 도로명 주소나 건물 이름으로 적어 주세요.</p>
+  </section>
+  <div id="place-list"></div>
+  <button id="add-place" class="secondary" type="button">＋ 새로운 장소 추가</button>
+</main>
+
+<main id="tab-connect" class="tab" hidden>
+  <h1>연결·기록</h1>
+
+  <section class="card">
+    <strong>① 등록용 단축어</strong>
+    <p class="small">이 웹앱은 미리알림을 직접 만들 수 없어서, 아이폰의 단축어가 대신 등록합니다. 아래 이름과 단축어 앱에 있는 단축어 이름이 정확히 같아야 합니다.</p>
+    <label class="field"><span>단축어 이름</span><input id="shortcut-name" type="text" autocomplete="off"></label>
+    <div class="row">
+      <button id="test-shortcut" class="secondary" type="button">테스트 미리알림 보내기</button>
+      <button id="mark-connected" class="secondary" type="button">연결 확인됨으로 표시</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <strong>② 동작 버튼용 주소</strong>
+    <p class="small">동작 버튼에 연결할 "받아쓰기" 단축어에 넣는 주소입니다. 내 장소 설정이 주소 안에 함께 들어가므로, 장소를 바꾸면 다시 복사해서 단축어에 붙여 넣어 주세요.</p>
+    <textarea id="launcher-url" rows="3" readonly></textarea>
+    <button id="copy-launcher" class="secondary" type="button">주소 복사</button>
+  </section>
+
+  <section class="card">
+    <div class="preview-head">
+      <strong>최근 보낸 항목</strong>
+      <a class="pill" href="x-apple-reminderkit://">미리알림 앱 열기</a>
+    </div>
+    <p class="small">단축어로 넘긴 기록입니다. 실제 등록 결과는 미리알림 앱에서 확인해 주세요.</p>
+    <ul id="history" class="history"></ul>
+    <button id="clear-history" class="link" type="button">기록 지우기</button>
+  </section>
+</main>
+
+<nav class="tabbar">
+  <button data-tab="capture" class="active" type="button"><span>🎙️</span>음성 입력</button>
+  <button data-tab="places" type="button"><span>📍</span>내 장소</button>
+  <button data-tab="connect" type="button"><span>🔗</span>연결·기록</button>
+</nav>
+
+<div id="toast" role="status" hidden></div>
+
+<script src="parser.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
